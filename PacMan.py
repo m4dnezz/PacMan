@@ -1,7 +1,7 @@
 import pygame
 import sys
 import numpy as np
-version = 1
+version = 0.1
 pygame.init()
 width, height = 800, 600
 screen = pygame.display.set_mode((width, height))

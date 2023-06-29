@@ -147,3 +147,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# TODO: Construct maze walls
+# TODO: Add "white dots"
+# TODO: Add the ghost(s)
+# TODO: Improve interface, sound controll, scoreboard, restart

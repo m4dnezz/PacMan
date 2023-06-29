@@ -132,6 +132,3 @@ while game_running:
         player.moveDown()
     # Move Pac-Man down
 
-    # TODO: Update game stats
-    # TODO: Draw game screen
-    # TODO: Implement logic (death, collision, ghosts, points)

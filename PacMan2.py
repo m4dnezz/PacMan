@@ -4,6 +4,7 @@ import sys
 WIDTH = 1280
 HEIGHT = 720
 BACKGROUND = (0, 0, 0)
+VERSION = 0.1
 
 
 class Sprite(pygame.sprite.Sprite): # Super Class made by pygame
@@ -114,6 +115,7 @@ class Ghost(Sprite): # Ghost class
 def main():
     pygame.init()
     pygame.mixer.init()
+    pygame.display.set_caption(f"Pac-Man Game Version {VERSION}")
     intro_music = pygame.mixer_music.load("sound/pacman_beginning.wav")
     pygame.mixer_music.play(1)
     screen = pygame.display.set_mode((WIDTH, HEIGHT))

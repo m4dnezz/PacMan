@@ -14,6 +14,7 @@ game_running = True
 # Set up colors for walls and dots
 wall_color = (0, 0, 255)  # Blue color for walls
 dot_color = (255, 255, 255)  # White color for dots
+player_color = (255, 0, 0)
 
 # Set up Maze
 maze_data = [
@@ -28,10 +29,11 @@ maze_data = [
 
 
 
-class Player:
-    x = 10
-    y = 10
-    speed = 1
+class PlayerClass:
+    def __init__(self):
+        self.x = 70
+        self.y = 85
+        self.speed = 5
 
     def moveRight(self):
         self.x = self.x + self.speed
@@ -45,13 +47,8 @@ class Player:
     def moveDown(self):
         self.y = self.y + self.speed
 
-
-class Ghost:
-    x = 48
-    y = 105
-    speed = 1
-
-    # TODO: Define movement
+    def get_pos(self):
+        return self.x, self.y
 
 
 class Maze:
@@ -89,6 +86,7 @@ class Maze:
 
 
 maze = Maze(maze_data)
+player = PlayerClass()
 
 # Set up cell dimensions
 cell_width = width // maze.columns
@@ -115,21 +113,23 @@ while game_running:
                     cell_width // 10,
                 )
 
+    pygame.draw.circle(screen, (0,0,0), (player.get_pos()[0], player.get_pos()[1]), 20)
+    pygame.draw.circle(screen, player_color, (player.get_pos()[0], player.get_pos()[1]), 20)
     pygame.display.update()
     clock.tick(60)
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
-        pass
+        player.moveLeft()
     # Move Pac-Man left
     elif keys[pygame.K_RIGHT]:
-        pass
+        player.moveRight()
     # Move Pac-Man right
     elif keys[pygame.K_UP]:
-        pass
+        player.moveUp()
     # Move Pac-Man up
     elif keys[pygame.K_DOWN]:
-        pass
+        player.moveDown()
     # Move Pac-Man down
 
     # TODO: Update game stats

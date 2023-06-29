@@ -64,21 +64,33 @@ class Player(Sprite):
             self.move_left_img()
             self.direction = "left"
             self.right = True
+            if not pygame.mixer_music.get_busy():
+                chomp_sound = pygame.mixer_music.load("sound/pacman_chomp.wav")
+                pygame.mixer_music.play(1)
         elif key[pygame.K_RIGHT] and self.right == True:
             self.move(self.speed, 0)
             self.move_right_img()
             self.direction = "right"
             self.left = True
+            if not pygame.mixer_music.get_busy():
+                chomp_sound = pygame.mixer_music.load("sound/pacman_chomp.wav")
+                pygame.mixer_music.play(1)
         elif key[pygame.K_UP] and self.up == True:
             self.move(0, -self.speed)
             self.move_up_img()
             self.direction = "up"
             self.down = True
+            if not pygame.mixer_music.get_busy():
+                chomp_sound = pygame.mixer_music.load("sound/pacman_chomp.wav")
+                pygame.mixer_music.play(1)
         elif key[pygame.K_DOWN] and self.down == True:
             self.move(0, self.speed)
             self.move_down_img()
             self.direction = "down"
             self.up = True
+            if not pygame.mixer_music.get_busy():
+                chomp_sound = pygame.mixer_music.load("sound/pacman_chomp.wav")
+                pygame.mixer_music.play(1)
 
 
 class Wall(Sprite):
@@ -93,6 +105,9 @@ class Ghost(Sprite):
 
 def main():
     pygame.init()
+    pygame.mixer.init()
+    intro_music = pygame.mixer_music.load("sound/pacman_beginning.wav")
+    pygame.mixer_music.play(1)
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     player = Player(200, 200)

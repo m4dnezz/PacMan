@@ -1,7 +1,6 @@
 import pygame
 import sys
 
-
 WIDTH = 1280
 HEIGHT = 720
 BACKGROUND = (0, 0, 0)
@@ -27,9 +26,13 @@ class Player(Sprite):
     def __init__(self, startx, starty):
         super().__init__("images/pacmanimgright.png", startx, starty)
         self.speed = 4
-        self.facing_right = True
+        self.up = True
+        self.down = True
+        self.right = True
+        self.left = True
+        self.direction = None
 
-    def move(self, x ,y):
+    def move(self, x, y):
         self.rect.move_ip([x, y])
 
     def move_left_img(self):
@@ -44,25 +47,44 @@ class Player(Sprite):
     def move_down_img(self):
         self.image = pygame.image.load("images/pacmanimgdown.png")
 
-    def update(self):
+    def update(self, walls):
         key = pygame.key.get_pressed()
-        if key[pygame.K_LEFT]:
+        collision = pygame.sprite.spritecollideany(self, walls)
+        if collision and self.direction == "left":
+            self.left = False
+        if collision and self.direction == "right":
+            self.right = False
+        if collision and self.direction == "up":
+            self.up = False
+        if collision and self.direction == "down":
+            self.down = False
+
+        if key[pygame.K_LEFT] and self.left == True:
             self.move(-self.speed, 0)
             self.move_left_img()
-        elif key[pygame.K_RIGHT]:
+            self.direction = "left"
+            self.right = True
+        elif key[pygame.K_RIGHT] and self.right == True:
             self.move(self.speed, 0)
             self.move_right_img()
-        elif key[pygame.K_UP]:
+            self.direction = "right"
+            self.left = True
+        elif key[pygame.K_UP] and self.up == True:
             self.move(0, -self.speed)
             self.move_up_img()
-        elif key[pygame.K_DOWN]:
+            self.direction = "up"
+            self.down = True
+        elif key[pygame.K_DOWN] and self.down == True:
             self.move(0, self.speed)
             self.move_down_img()
+            self.direction = "down"
+            self.up = True
 
 
 class Wall(Sprite):
     def __init__(self, startx, starty):
-        super().__init__("images/bricks.png", startx, starty )
+        super().__init__("images/bricks.png", startx, starty)
+
 
 class Ghost(Sprite):
     def __init__(self, startx, starty, image):
@@ -75,18 +97,17 @@ def main():
     clock = pygame.time.Clock()
     player = Player(200, 200)
     walls = pygame.sprite.Group()
-    for wls in range(0,WIDTH,28):
-        walls.add(Wall(wls, HEIGHT-20))
+    for wls in range(0, WIDTH, 28):
+        walls.add(Wall(wls, HEIGHT - 20))
         walls.add(Wall(wls, 20))
     for wls in range(0, HEIGHT, 28):
         walls.add(Wall(20, wls))
-        walls.add(Wall(WIDTH-20, wls))
-
+        walls.add(Wall(WIDTH - 20, wls))
 
     while True:
         screen.fill(BACKGROUND)
         pygame.event.pump()
-        player.update()
+        player.update(walls)
         player.draw(screen)
         walls.draw(screen)
         pygame.display.flip()

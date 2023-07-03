@@ -61,6 +61,9 @@ class Player(Sprite):  # Player class, representing PacMan
     def move_down_img(self):
         self.image = pygame.image.load("images/pacmanimgdown.png")
 
+    def get_position(self):
+        return self.rect.x, self.rect.y
+
     def update(self, walls):
         key = pygame.key.get_pressed()  # Returns pressed keys
         # Collision detection, should probably be separate function
@@ -196,7 +199,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-# TODO: Construct maze walls
-# TODO: Add "white dots"
+# TODO: Add interaction with "points"
 # TODO: Add the ghost(s)
 # TODO: Improve interface, sound controll, scoreboard, restart
+# TODO: Player class and update function is WHACK, clean that shit up

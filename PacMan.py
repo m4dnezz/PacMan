@@ -1,5 +1,7 @@
 import pygame
 import sys
+import abc
+import numpy as np
 
 WIDTH = 1280
 HEIGHT = 720
@@ -14,7 +16,7 @@ PURPLE = (128, 0, 128)
 ORANGE = (255, 165, 0)
 PINK = (255, 192, 203)
 CYAN = (0, 255, 255)
-VERSION = "0.1.5"
+VERSION = "0.1.7"
 score = 0
 
 
@@ -27,11 +29,15 @@ class Sprite(pygame.sprite.Sprite):  # Super Class made by pygame
 
         self.rect.center = [startx, starty]
 
+    @abc.abstractmethod
     def update(self):
         pass
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+
+    def get_pos(self):
+        return self.rect.center
 
 
 class Player(Sprite):  # Player class, representing PacMan
@@ -105,6 +111,59 @@ class Player(Sprite):  # Player class, representing PacMan
             self.move_sound()
 
 
+class Ghost(Sprite):
+    def __init__(self, startx, starty):
+        super().__init__("images/Blue_Ghost.png", startx, starty)
+        self.direction = None
+        self.speed = 1
+        self.yspeed = 0
+        self.xspeed = 0
+
+    def move(self, x, y):
+        self.rect.move_ip([x, y])
+
+    def calc_move(self, target, pos, collision):
+        ydiff = target[1] - pos[1]
+        xdiff = target[0] - pos[0]
+
+        if xdiff > 0 and ydiff == 0: # Move to right
+            self.move(self.speed, 0)
+            self.direction = "right"
+        elif xdiff == 0 and ydiff > 0: # Move down
+            self.move(0, self.speed)
+            self.direction = "down"
+        elif xdiff < 0 and ydiff == 0: # Move left
+            self.move(-self.speed, 0)
+            self.direction = "left"
+        elif xdiff == 0 and ydiff <= 0: # Move up
+            self.move(0, -self.speed)
+            self.direction = "up"
+
+        if collision and self.direction == "left":
+            self.move(self.speed, 0)  # Bounce back slightly
+        elif collision and self.direction == "right":
+            self.move(-self.speed, 0)  # Bounce back slightly
+        elif collision and self.direction == "up":
+            self.move(0, self.speed)  # Bounce back slightly
+        elif collision and self.direction == "down":
+            self.move(0, -self.speed)  # Bounce back slightly
+
+    def update(self, walls, playergroup, player):
+        target = player.get_pos() # Target coordinates
+        pos = self.get_pos() # Ghost coordinates
+        player_direction = player.direction # Future smart ghost might use this
+
+        collision = pygame.sprite.spritecollideany(self, walls)
+        kill = pygame.sprite.spritecollide(self, playergroup, dokill=True)
+
+        if kill:
+            print("dead") # End game
+
+        self.calc_move(target, pos, collision)
+
+
+
+
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
@@ -149,6 +208,7 @@ def game(maze):
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     player = Player(300, 300)
+    ghost = Ghost(800, 500)
     scoreboard = Scoreboard()
 
     cell_width = WIDTH // len(maze_data[0])
@@ -157,6 +217,8 @@ def game(maze):
 
     walls = pygame.sprite.Group()  # Create a group since we will create a LOT of wall-segments
     points = pygame.sprite.Group()  # Create a group of points
+    player_group = pygame.sprite.GroupSingle()
+    player_group.add(player)
 
     for row in range(len(maze_data)):
         for col in range(len(maze_data[row])):
@@ -175,12 +237,16 @@ def game(maze):
         screen.fill(BLACK)  # Make screen Black
         pygame.event.pump()  # internally process pygame event handlers
         player.update(walls, points)
+        ghost.update(walls, player_group, player)
         scoreboard.update_score(score)
+
         player.draw(screen)  # Draw player
         walls.draw(screen)  # Draw walls
+        ghost.draw(screen)
         scoreboard.draw(screen)
         for dot in points:  # Draw points
             dot.draw(screen)
+
         pygame.display.flip()  # Update the full display Surface to the screen
         clock.tick(60)  # Limits FPS (affects game speed aswell)
 
@@ -192,8 +258,9 @@ def game(maze):
                 pygame.quit()
                 sys.exit()
 
-# TODO: Fix code structure, main-file, logic-file, GUI-file
 # TODO: Add the ghost(s)
+# TODO: Fix ghost movement, no diagonals
 # TODO: Improve interface, sound controll, scoreboard, restart
 # TODO: Player class and update function is WHACK, clean that shit up
 # TODO: Run the application through web browser using django
+# TODO: Fix code structure, main-file, logic-file, GUI-file (Poor support with pygame framework) # HALTED

@@ -6,7 +6,7 @@ HEIGHT = 720
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 score = 0
 
 maze_data = [

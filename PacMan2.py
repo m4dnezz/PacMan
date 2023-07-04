@@ -41,10 +41,6 @@ class Player(Sprite):  # Player class, representing PacMan
     def __init__(self, startx, starty):
         super().__init__("images/pacmanimgright.png", startx, starty)
         self.speed = 4
-        self.up = True
-        self.down = True
-        self.right = True
-        self.left = True
         self.direction = None
 
     def move(self, x, y):
@@ -62,81 +58,60 @@ class Player(Sprite):  # Player class, representing PacMan
     def move_down_img(self):
         self.image = pygame.image.load("images/pacmanimgdown.png")
 
-    def get_position(self):
-        return self.rect.x, self.rect.y
+    def move_sound(self):
+        if not pygame.mixer_music.get_busy():
+            pygame.mixer_music.load("sound/pacman_chomp.wav")
+            pygame.mixer_music.play(1)
 
     def update(self, walls, points):
         key = pygame.key.get_pressed()  # Returns pressed keys
         # Collision detection, should probably be separate function
         collision = pygame.sprite.spritecollideany(self, walls)
-        points_gathered = pygame.sprite.spritecollide(self, points, dokill=True)
-        for _ in points_gathered:
+        points_gathered = pygame.sprite.spritecollide(self, points, dokill=True)  # Detect and remove gathered points
+
+        if points_gathered:
             global score
             score += 1
 
         if collision and self.direction == "left":
-            self.left = False
-            self.move(self.speed, 0)  # Bounce back slightly (less likely to get stuck)
-        if collision and self.direction == "right":
-            self.right = False
+            self.move(self.speed, 0)  # Bounce back slightly
+        elif collision and self.direction == "right":
             self.move(-self.speed, 0)  # Bounce back slightly
-        if collision and self.direction == "up":
-            self.up = False
+        elif collision and self.direction == "up":
             self.move(0, self.speed)  # Bounce back slightly
-        if collision and self.direction == "down":
-            self.down = False
+        elif collision and self.direction == "down":
             self.move(0, -self.speed)  # Bounce back slightly
 
-        if key[pygame.K_LEFT] and self.left == True:  # What to do if left arrow is pressed
+        if key[pygame.K_LEFT]:  # What to do if left arrow is pressed
             self.move(-self.speed, 0)  # Move player
             self.move_left_img()  # Change image of player
             self.direction = "left"  # Store direction, used for collision
-            self.right = True  # Reverts previous collision block
-            self.down = True
-            self.up = True
-            if not pygame.mixer_music.get_busy():
-                pygame.mixer_music.load("sound/pacman_chomp.wav")
-                pygame.mixer_music.play(1)
+            self.move_sound()
 
-        elif key[pygame.K_RIGHT] and self.right == True:  # What to do if right arrow is pressed
+        elif key[pygame.K_RIGHT]:  # What to do if right arrow is pressed
             self.move(self.speed, 0)
             self.move_right_img()
             self.direction = "right"
-            self.left = True
-            self.down = True
-            self.up = True
-            if not pygame.mixer_music.get_busy():
-                pygame.mixer_music.load("sound/pacman_chomp.wav")
-                pygame.mixer_music.play(1)
+            self.move_sound()
 
-        elif key[pygame.K_UP] and self.up == True:  # What to do if up arrow is pressed
+        elif key[pygame.K_UP]:  # What to do if up arrow is pressed
             self.move(0, -self.speed)
             self.move_up_img()
             self.direction = "up"
-            self.down = True
-            self.left = True
-            self.right = True
-            if not pygame.mixer_music.get_busy():
-                pygame.mixer_music.load("sound/pacman_chomp.wav")
-                pygame.mixer_music.play(1)
+            self.move_sound()
 
-        elif key[pygame.K_DOWN] and self.down == True:  # What to do if down arrow is pressed
+        elif key[pygame.K_DOWN]:  # What to do if down arrow is pressed
             self.move(0, self.speed)
             self.move_down_img()
             self.direction = "down"
-            self.up = True
-            self.left = True
-            self.right = True
-            if not pygame.mixer_music.get_busy():
-                pygame.mixer_music.load("sound/pacman_chomp.wav")
-                pygame.mixer_music.play(1)
+            self.move_sound()
 
 
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
         self.image = pygame.Surface([width, height])
-        self.image.fill((0, 0, 255))
+        self.image.fill(BLUE)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -178,7 +153,6 @@ def main():
     clock = pygame.time.Clock()
     player = Player(300, 300)
     scoreboard = Scoreboard()
-
 
     cell_width = WIDTH // len(maze_data[0])
     cell_height = (HEIGHT // len(maze_data)) - 10  # This makes no sense but is needed (Top bar takes space?)

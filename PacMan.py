@@ -41,8 +41,10 @@ class Sprite(pygame.sprite.Sprite):  # Super Class made by pygame
 
 
 class Player(Sprite):  # Player class, representing PacMan
-    def __init__(self, startx, starty):
-        super().__init__("images/pacmanimgright.png", startx, starty)
+    def __init__(self, startx, starty, width, height):
+        image = pygame.image.load("images/pacmanimgright.png")
+        image = pygame.transform.scale(image, width, height)
+        super().__init__(image, startx, starty)
         self.speed = 4
         self.direction = None
 
@@ -54,6 +56,7 @@ class Player(Sprite):  # Player class, representing PacMan
 
     def move_right_img(self):
         self.image = pygame.image.load("images/pacmanimgright.png")
+        self.image = pygame.transform.scale(self.image, (50, 50))
 
     def move_up_img(self):
         self.image = pygame.image.load("images/pacmanimgup.png")
@@ -207,13 +210,16 @@ def game(maze):
     pygame.mixer_music.play(1)
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
-    player = Player(300, 300)
-    ghost = Ghost(800, 500)
-    scoreboard = Scoreboard()
 
     cell_width = WIDTH // len(maze_data[0])
     cell_height = (HEIGHT // len(maze_data)) - 10  # This makes no sense but is needed (Top bar takes space?)
     dot_radius = min(cell_width, cell_height) // 8
+
+    player = Player(300, 300, cell_width, cell_height)
+    ghost = Ghost(800, 500)
+    scoreboard = Scoreboard()
+
+
 
     walls = pygame.sprite.Group()  # Create a group since we will create a LOT of wall-segments
     points = pygame.sprite.Group()  # Create a group of points

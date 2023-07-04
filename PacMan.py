@@ -128,19 +128,32 @@ class Ghost(Sprite):
     def calc_move(self, target, pos, collision, walls):
         ydiff = target[1] - pos[1]
         xdiff = target[0] - pos[0]
-
-        if xdiff > 0:
-            self.move(self.speed, 0)  # Move right
-            self.direction = "right"
-        elif xdiff < 0:
-            self.move(-self.speed, 0)  # Move left
-            self.direction = "left"
-        elif ydiff > 0:
-            self.move(0, self.speed)  # Move down
-            self.direction = "down"
-        elif ydiff < 0:
-            self.move(0, -self.speed)  # Move up
-            self.direction = "up"
+        if abs(ydiff) < abs(xdiff):
+            if xdiff > 0:
+                self.move(self.speed, 0)  # Move right
+                self.direction = "right"
+            elif xdiff < 0:
+                self.move(-self.speed, 0)  # Move left
+                self.direction = "left"
+            elif ydiff > 0:
+                self.move(0, self.speed)  # Move down
+                self.direction = "down"
+            elif ydiff < 0:
+                self.move(0, -self.speed)  # Move up
+                self.direction = "up"
+        else:
+            if ydiff > 0:
+                self.move(0, self.speed)  # Move down
+                self.direction = "down"
+            elif ydiff < 0:
+                self.move(0, -self.speed)  # Move up
+                self.direction = "up"
+            elif xdiff > 0:
+                self.move(self.speed, 0)  # Move right
+                self.direction = "right"
+            elif xdiff < 0:
+                self.move(-self.speed, 0)  # Move left
+                self.direction = "left"
 
     def update(self, walls, playergroup, player):
         target = player.get_pos()  # Target coordinates

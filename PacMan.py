@@ -21,10 +21,12 @@ score = 0
 
 
 class Sprite(pygame.sprite.Sprite):  # Super Class made by pygame
-    def __init__(self, image, startx, starty):
+    def __init__(self, image, startx, starty, width, height):
         super().__init__()
 
         self.image = pygame.image.load(image)
+        self.image = pygame.transform.scale(self.image, (width, height))
+
         self.rect = self.image.get_rect()
 
         self.rect.center = [startx, starty]
@@ -42,27 +44,27 @@ class Sprite(pygame.sprite.Sprite):  # Super Class made by pygame
 
 class Player(Sprite):  # Player class, representing PacMan
     def __init__(self, startx, starty, width, height):
-        image = pygame.image.load("images/pacmanimgright.png")
-        image = pygame.transform.scale(image, width, height)
-        super().__init__(image, startx, starty)
+        image = "images/pacmanimgright.png"
+        super().__init__(image, startx, starty, width, height)
         self.speed = 4
         self.direction = None
+        self.width = width
+        self.height = height
 
     def move(self, x, y):
         self.rect.move_ip([x, y])
 
     def move_left_img(self):
-        self.image = pygame.image.load("images/pacmanimgleft.png")
+        self.image = pygame.transform.scale(pygame.image.load("images/pacmanimgleft.png"), (self.width, self.height))
 
     def move_right_img(self):
-        self.image = pygame.image.load("images/pacmanimgright.png")
-        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.image = pygame.transform.scale(pygame.image.load("images/pacmanimgright.png"), (self.width, self.height))
 
     def move_up_img(self):
-        self.image = pygame.image.load("images/pacmanimgup.png")
+        self.image = pygame.transform.scale(pygame.image.load("images/pacmanimgup.png"), (self.width, self.height))
 
     def move_down_img(self):
-        self.image = pygame.image.load("images/pacmanimgdown.png")
+        self.image = pygame.transform.scale(pygame.image.load("images/pacmanimgdown.png"), (self.width, self.height))
 
     @staticmethod
     def move_sound():
@@ -115,8 +117,8 @@ class Player(Sprite):  # Player class, representing PacMan
 
 
 class Ghost(Sprite):
-    def __init__(self, startx, starty):
-        super().__init__("images/Blue_Ghost.png", startx, starty)
+    def __init__(self, startx, starty, width, height):
+        super().__init__("images/Blue_Ghost.png", startx, starty, width, height)
         self.direction = None
         self.speed = 1
         self.yspeed = 0
@@ -163,8 +165,6 @@ class Ghost(Sprite):
             print("dead") # End game
 
         self.calc_move(target, pos, collision)
-
-
 
 
 class Wall(pygame.sprite.Sprite):
@@ -215,15 +215,13 @@ def game(maze):
     cell_height = (HEIGHT // len(maze_data)) - 10  # This makes no sense but is needed (Top bar takes space?)
     dot_radius = min(cell_width, cell_height) // 8
 
-    player = Player(300, 300, cell_width, cell_height)
-    ghost = Ghost(800, 500)
+    player = Player(300, 280, cell_width-10, cell_height-10)
+    ghost = Ghost(750, 440, cell_width-10, cell_height-10)
+
     scoreboard = Scoreboard()
-
-
-
     walls = pygame.sprite.Group()  # Create a group since we will create a LOT of wall-segments
     points = pygame.sprite.Group()  # Create a group of points
-    player_group = pygame.sprite.GroupSingle()
+    player_group = pygame.sprite.GroupSingle() # For collision a group is needed
     player_group.add(player)
 
     for row in range(len(maze_data)):

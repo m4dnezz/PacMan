@@ -121,50 +121,51 @@ class Ghost(Sprite):
         super().__init__("images/Blue_Ghost.png", startx, starty, width, height)
         self.direction = None
         self.speed = 1
-        self.yspeed = 0
-        self.xspeed = 0
 
     def move(self, x, y):
         self.rect.move_ip([x, y])
 
-    def calc_move(self, target, pos, collision):
+    def calc_move(self, target, pos, collision, walls):
         ydiff = target[1] - pos[1]
         xdiff = target[0] - pos[0]
 
-        if xdiff > 0 and ydiff == 0: # Move to right
-            self.move(self.speed, 0)
-            self.direction = "right"
-        elif xdiff == 0 and ydiff > 0: # Move down
-            self.move(0, self.speed)
-            self.direction = "down"
-        elif xdiff < 0 and ydiff == 0: # Move left
-            self.move(-self.speed, 0)
-            self.direction = "left"
-        elif xdiff == 0 and ydiff <= 0: # Move up
-            self.move(0, -self.speed)
-            self.direction = "up"
+        if xdiff > 0:
+            self.move(self.speed, 0)  # Move right
+        elif xdiff < 0:
+            self.move(-self.speed, 0)  # Move left
+        elif ydiff > 0:
+            self.move(0, self.speed)  # Move down
+        elif ydiff < 0:
+            self.move(0, -self.speed)  # Move up
 
-        if collision and self.direction == "left":
-            self.move(self.speed, 0)  # Bounce back slightly
-        elif collision and self.direction == "right":
-            self.move(-self.speed, 0)  # Bounce back slightly
-        elif collision and self.direction == "up":
-            self.move(0, self.speed)  # Bounce back slightly
-        elif collision and self.direction == "down":
-            self.move(0, -self.speed)  # Bounce back slightly
+        if collision:
+            # Find alternative direction to avoid the wall
+            directions = [
+                (self.speed, 0),  # Right
+                (-self.speed, 0),  # Left
+                (0, self.speed),  # Down
+                (0, -self.speed),  # Up
+            ]
+
+            # Try each direction and choose the first one that doesn't result in a collision
+            for direction in directions:
+                self.move(*direction)
+                if not pygame.sprite.spritecollideany(self, walls):
+                    break
+                self.move(*[-coord for coord in direction])  # Undo the move
 
     def update(self, walls, playergroup, player):
-        target = player.get_pos() # Target coordinates
-        pos = self.get_pos() # Ghost coordinates
-        player_direction = player.direction # Future smart ghost might use this
+        target = player.get_pos()  # Target coordinates
+        pos = self.get_pos()  # Ghost coordinates
+        player_direction = player.direction  # Future smart ghost might use this
 
         collision = pygame.sprite.spritecollideany(self, walls)
         kill = pygame.sprite.spritecollide(self, playergroup, dokill=True)
 
         if kill:
-            print("dead") # End game
+            print("dead")  # End game
 
-        self.calc_move(target, pos, collision)
+        self.calc_move(target, pos, collision, walls)
 
 
 class Wall(pygame.sprite.Sprite):
@@ -215,13 +216,13 @@ def game(maze):
     cell_height = (HEIGHT // len(maze_data)) - 10  # This makes no sense but is needed (Top bar takes space?)
     dot_radius = min(cell_width, cell_height) // 8
 
-    player = Player(300, 280, cell_width-10, cell_height-10)
-    ghost = Ghost(750, 440, cell_width-10, cell_height-10)
+    player = Player(300, 280, cell_width - 10, cell_height - 10)
+    ghost = Ghost(750, 440, cell_width - 10, cell_height - 10)
 
     scoreboard = Scoreboard()
     walls = pygame.sprite.Group()  # Create a group since we will create a LOT of wall-segments
     points = pygame.sprite.Group()  # Create a group of points
-    player_group = pygame.sprite.GroupSingle() # For collision a group is needed
+    player_group = pygame.sprite.GroupSingle()  # For collision a group is needed
     player_group.add(player)
 
     for row in range(len(maze_data)):
@@ -258,7 +259,7 @@ def game(maze):
             if event.type == pygame.QUIT:  # if "X" is pressed on window, close application
                 pygame.quit()
                 sys.exit()
-            elif pygame.key.get_pressed()[pygame.K_ESCAPE]: # If escape button pressed, close application
+            elif pygame.key.get_pressed()[pygame.K_ESCAPE]:  # If escape button pressed, close application
                 pygame.quit()
                 sys.exit()
 

@@ -128,7 +128,7 @@ class Ghost(Sprite):
     def calc_move(self, target, pos, collision, walls):
         ydiff = target[1] - pos[1]
         xdiff = target[0] - pos[0]
-        if abs(ydiff) < abs(xdiff):
+        if abs(ydiff) < abs(xdiff): # Should vertical or horizontal movement be prioritized
             if xdiff > 0:
                 self.move(self.speed, 0)  # Move right
                 self.direction = "right"

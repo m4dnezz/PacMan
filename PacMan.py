@@ -121,6 +121,10 @@ class Ghost(Sprite):
         super().__init__("images/Blue_Ghost.png", startx, starty, width, height)
         self.speed = 1
         self.direction = None
+        self.right = True
+        self.left = True
+        self.up = True
+        self.down = True
 
     def move(self, x, y):
         self.rect.move_ip([x, y])
@@ -128,32 +132,60 @@ class Ghost(Sprite):
     def calc_move(self, target, pos, collision, walls):
         ydiff = target[1] - pos[1]
         xdiff = target[0] - pos[0]
-        if abs(ydiff) < abs(xdiff): # Should vertical or horizontal movement be prioritized
-            if xdiff > 0:
+
+        if collision and self.direction == "left":
+            self.move(self.speed, 0)  # Bounce back slightly
+            self.left = False
+        elif collision and self.direction == "right":
+            self.move(-self.speed, 0)  # Bounce back slightly
+            self.right = False
+        elif collision and self.direction == "up":
+            self.move(0, self.speed)  # Bounce back slightly
+            self.up = False
+        elif collision and self.direction == "down":
+            self.move(0, -self.speed)  # Bounce back slightly
+            self.down = False
+
+        if abs(ydiff) <= abs(xdiff):  # Should vertical or horizontal movement be prioritized
+            if xdiff > 0 and self.right:
                 self.move(self.speed, 0)  # Move right
                 self.direction = "right"
-            elif xdiff < 0:
+                self.left = True
+            elif xdiff > 0 and not self.right:
+                if ydiff > 0 and self.down:
+                    self.move(0, self.speed)  # Move down
+                    self.direction = "down"
+                    self.up = True
+                elif ydiff < 0 and self.up:
+                    self.move(0, -self.speed)  # Move up
+                    self.direction = "up"
+                    self.down = True
+            elif xdiff < 0 and self.left:
                 self.move(-self.speed, 0)  # Move left
                 self.direction = "left"
-            elif ydiff > 0:
-                self.move(0, self.speed)  # Move down
-                self.direction = "down"
-            elif ydiff < 0:
-                self.move(0, -self.speed)  # Move up
-                self.direction = "up"
+                self.right = True
+            elif xdiff < 0 and not self.left:
+                if ydiff > 0 and self.down:
+                    self.move(0, self.speed)  # Move down
+                    self.direction = "down"
+                    self.up = True
+                elif ydiff < 0 and self.up:
+                    self.move(0, -self.speed)  # Move up
+                    self.direction = "up"
+                    self.down = True
         else:
-            if ydiff > 0:
+            if ydiff > 0 and self.down:
                 self.move(0, self.speed)  # Move down
                 self.direction = "down"
-            elif ydiff < 0:
+                self.up = True
+            elif ydiff > 0 and not self.down:
+                pass
+            elif ydiff < 0 and self.up:
                 self.move(0, -self.speed)  # Move up
                 self.direction = "up"
-            elif xdiff > 0:
-                self.move(self.speed, 0)  # Move right
-                self.direction = "right"
-            elif xdiff < 0:
-                self.move(-self.speed, 0)  # Move left
-                self.direction = "left"
+                self.down = True
+            elif ydiff < 0 and not self.up:
+                pass
 
     def update(self, walls, playergroup, player):
         target = player.get_pos()  # Target coordinates
@@ -242,15 +274,18 @@ def game(maze):
     while True:
         screen.fill(BLACK)  # Make screen Black
         pygame.event.pump()  # internally process pygame event handlers
+
+        # Update Stuff
         player.update(walls, points)
         ghost.update(walls, player_group, player)
         scoreboard.update_score(score)
 
-        player.draw(screen)  # Draw player
-        walls.draw(screen)  # Draw walls
+        # Draw Stuff
+        player.draw(screen)
+        walls.draw(screen)
         ghost.draw(screen)
         scoreboard.draw(screen)
-        for dot in points:  # Draw points
+        for dot in points:
             dot.draw(screen)
 
         pygame.display.flip()  # Update the full display Surface to the screen

@@ -7,6 +7,7 @@ BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 VERSION = "0.1.2"
+score = 0
 
 maze_data = [
     ["#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#"],
@@ -64,10 +65,14 @@ class Player(Sprite):  # Player class, representing PacMan
     def get_position(self):
         return self.rect.x, self.rect.y
 
-    def update(self, walls):
+    def update(self, walls, points):
         key = pygame.key.get_pressed()  # Returns pressed keys
         # Collision detection, should probably be separate function
         collision = pygame.sprite.spritecollideany(self, walls)
+        points_gathered = pygame.sprite.spritecollide(self, points, dokill=True)
+        for _ in points_gathered:
+            global score
+            score += 1
 
         if collision and self.direction == "left":
             self.left = False
@@ -148,6 +153,21 @@ class Point(pygame.sprite.Sprite):
         pygame.draw.circle(screen, YELLOW, self.rect.center, self.radius)
 
 
+class Scoreboard:
+    def __init__(self):
+        self.score = 0
+        self.font = None
+        self.text = None
+
+    def draw(self, screen):
+        self.font = pygame.font.Font(None, 36)
+        self.text = self.font.render(f'score: {self.score}', True, YELLOW)
+        screen.blit(self.text, (10, 10))
+
+    def update_score(self, score):
+        self.score = score
+
+
 def main():
     pygame.init()
     pygame.mixer.init()
@@ -157,11 +177,12 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     player = Player(300, 300)
+    scoreboard = Scoreboard()
+
 
     cell_width = WIDTH // len(maze_data[0])
     cell_height = (HEIGHT // len(maze_data)) - 10  # This makes no sense but is needed (Top bar takes space?)
     dot_radius = min(cell_width, cell_height) // 8
-    print(dot_radius)
 
     walls = pygame.sprite.Group()  # Create a group since we will create a LOT of wall-segments
     points = pygame.sprite.Group()  # Create a group of points
@@ -180,15 +201,17 @@ def main():
                 points.add(dot)
 
     while True:
-        screen.fill(BLACK) # Make screen Black
-        pygame.event.pump() # internally process pygame event handlers
-        player.update(walls)
-        player.draw(screen) # Draw player
-        walls.draw(screen) # Draw walls
-        for dot in points: # Draw points
+        screen.fill(BLACK)  # Make screen Black
+        pygame.event.pump()  # internally process pygame event handlers
+        player.update(walls, points)
+        scoreboard.update_score(score)
+        player.draw(screen)  # Draw player
+        walls.draw(screen)  # Draw walls
+        scoreboard.draw(screen)
+        for dot in points:  # Draw points
             dot.draw(screen)
-        pygame.display.flip() # Update the full display Surface to the screen
-        clock.tick(60) # Limits FPS (affects game speed aswell)
+        pygame.display.flip()  # Update the full display Surface to the screen
+        clock.tick(60)  # Limits FPS (affects game speed aswell)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:  # if "X" is pressed on window, close application
@@ -203,3 +226,4 @@ if __name__ == "__main__":
 # TODO: Add the ghost(s)
 # TODO: Improve interface, sound controll, scoreboard, restart
 # TODO: Player class and update function is WHACK, clean that shit up
+# TODO: Run the application through web browser using django

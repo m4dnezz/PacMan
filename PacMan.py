@@ -119,8 +119,8 @@ class Player(Sprite):  # Player class, representing PacMan
 class Ghost(Sprite):
     def __init__(self, startx, starty, width, height):
         super().__init__("images/Blue_Ghost.png", startx, starty, width, height)
-        self.direction = None
         self.speed = 1
+        self.direction = None
 
     def move(self, x, y):
         self.rect.move_ip([x, y])
@@ -131,28 +131,16 @@ class Ghost(Sprite):
 
         if xdiff > 0:
             self.move(self.speed, 0)  # Move right
+            self.direction = "right"
         elif xdiff < 0:
             self.move(-self.speed, 0)  # Move left
+            self.direction = "left"
         elif ydiff > 0:
             self.move(0, self.speed)  # Move down
+            self.direction = "down"
         elif ydiff < 0:
             self.move(0, -self.speed)  # Move up
-
-        if collision:
-            # Find alternative direction to avoid the wall
-            directions = [
-                (self.speed, 0),  # Right
-                (-self.speed, 0),  # Left
-                (0, self.speed),  # Down
-                (0, -self.speed),  # Up
-            ]
-
-            # Try each direction and choose the first one that doesn't result in a collision
-            for direction in directions:
-                self.move(*direction)
-                if not pygame.sprite.spritecollideany(self, walls):
-                    break
-                self.move(*[-coord for coord in direction])  # Undo the move
+            self.direction = "up"
 
     def update(self, walls, playergroup, player):
         target = player.get_pos()  # Target coordinates

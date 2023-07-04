@@ -6,19 +6,16 @@ HEIGHT = 720
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+WHITE = (255, 255, 255)
+GRAY = (128, 128, 128)
+PURPLE = (128, 0, 128)
+ORANGE = (255, 165, 0)
+PINK = (255, 192, 203)
+CYAN = (0, 255, 255)
 VERSION = "0.1.5"
 score = 0
-
-maze_data = [
-    ["#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#"],
-    ["#", ".", ".", ".", ".", ".", "#", ".", ".", ".", ".", ".", ".", ".", ".", "#"],
-    ["#", "#", "#", "#", "#", ".", "#", ".", "#", "#", "#", "#", ".", "#", ".", "#"],
-    ["#", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "#", ".", "#", ".", "#"],
-    ["#", ".", "#", "#", "#", "#", "#", ".", "#", ".", "#", "#", ".", "#", ".", "#"],
-    ["#", ".", ".", ".", ".", ".", ".", ".", "#", ".", ".", ".", ".", ".", ".", "#"],
-    ["#", ".", ".", ".", ".", ".", ".", ".", "#", ".", ".", ".", ".", ".", ".", "#"],
-    ["#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#"]
-]
 
 
 class Sprite(pygame.sprite.Sprite):  # Super Class made by pygame
@@ -58,7 +55,8 @@ class Player(Sprite):  # Player class, representing PacMan
     def move_down_img(self):
         self.image = pygame.image.load("images/pacmanimgdown.png")
 
-    def move_sound(self):
+    @staticmethod
+    def move_sound():
         if not pygame.mixer_music.get_busy():
             pygame.mixer_music.load("sound/pacman_chomp.wav")
             pygame.mixer_music.play(1)
@@ -143,9 +141,8 @@ class Scoreboard:
         self.score = score
 
 
-def main():
-    pygame.init()
-    pygame.mixer.init()
+def game(maze):
+    maze_data = maze
     pygame.display.set_caption(f"Pac-Man Game Version {VERSION}")
     pygame.mixer_music.load("sound/pacman_beginning.wav")
     pygame.mixer_music.play(1)
@@ -191,12 +188,11 @@ def main():
             if event.type == pygame.QUIT:  # if "X" is pressed on window, close application
                 pygame.quit()
                 sys.exit()
+            elif pygame.key.get_pressed()[pygame.K_ESCAPE]: # If escape button pressed, close application
+                pygame.quit()
+                sys.exit()
 
-
-if __name__ == "__main__":
-    main()
-
-# TODO: Add interaction with "points"
+# TODO: Fix code structure, main-file, logic-file, GUI-file
 # TODO: Add the ghost(s)
 # TODO: Improve interface, sound controll, scoreboard, restart
 # TODO: Player class and update function is WHACK, clean that shit up

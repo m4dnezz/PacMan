@@ -117,6 +117,7 @@ class Player(Sprite):  # Player class, representing PacMan
 
 
 class Ghost(Sprite):
+    #En klass per spöke ? 
     def __init__(self, startx, starty, width, height):
         super().__init__("images/Blue_Ghost.png", startx, starty, width, height)
         self.speed = 1
@@ -130,9 +131,11 @@ class Ghost(Sprite):
         self.rect.move_ip([x, y])
 
     def calc_move(self, target, pos, collision, walls):
+        #Använda dijksta's eller nått ist? 
         ydiff = target[1] - pos[1]
         xdiff = target[0] - pos[0]
 
+        #Ghost ska aldrig collidea väl, de vet vägen de vill ta
         if collision and self.direction == "left":
             self.move(self.speed, 0)  # Bounce back slightly
             self.left = False
